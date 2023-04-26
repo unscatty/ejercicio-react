@@ -1,51 +1,31 @@
 import { useState } from 'react'
 import './App.css'
+import ModalExito from '~/components/ModalExito'
 
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import isMobilePhone from 'validator/es/lib/isMobilePhone'
+import { Genero, FormValidationSchema, validationSchema } from '~/utils/form-validation'
 
-enum Genero {
-  MASCULINO = 'Masculino',
-  FEMENINO = 'Femenino',
-  NO_BINARIO = 'No Binario',
-  NO_ESPECIFICADO = 'Prefiero no especificar',
-}
-
-const validationSchema = z
-  .object({
-    nombre: z.string().min(2, { message: "Nombre es un campo requerido" }),
-    apellidoPaterno: z.string().min(2, { message: "Apellido Paterno es un campo requerido" }),
-    apellidoMaterno: z.string().min(2, { message: "Apellido Materno es un campo requerido" }),
-    email: z.string().min(1, { message: "Correo Electrónico es un campo requerido" }).email({
-      message: "Correo Electrónico debe ser una dirección de correo válida",
-    }),
-    telefono: z
-      .string().min(1, { message: "Teléfono es un campo requerido" })
-      .refine((value) => isMobilePhone(value, 'es-MX'), {
-        message: "Teléfono debe ser un número de teléfono válido",
-      }),
-    genero: z.nativeEnum(Genero),
-    terms: z.literal(true, {
-      errorMap: () => ({ message: "Por favor acepta los términos y condiciones" }),
-    }),
-  })
-
-type ValidationSchema = z.infer<typeof validationSchema>;
 
 function App() {
   const [name, setName] = useState('')
+  const [formData, setFormData] = useState<FormValidationSchema | undefined>();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ValidationSchema>({
+  } = useForm<FormValidationSchema>({
     resolver: zodResolver(validationSchema),
   });
 
-  const onSubmit: SubmitHandler<ValidationSchema> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<FormValidationSchema> = (data) => {
+    setFormData(data);
+    setSuccessModalOpen(true);
+  };
+
+  const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
+
 
   return (
     <>
@@ -55,7 +35,10 @@ function App() {
             <h3 className="pt-4 text-2xl text- font-bold">
               ¡Bienvenid@{name ? ' ' + name : ''}!
             </h3>
-            <form className="px-8 pt-6 pb-8 mb-4 text-left" noValidate onSubmit={handleSubmit(onSubmit)}>
+            <p className="px-10 sm:px-20 mt-3 text-xs">
+              Por favor llena el siguiente formulario para poder continuar con tu registro.
+            </p>
+            <form className="px-8 my-4 text-left" noValidate onSubmit={handleSubmit(onSubmit)}>
               <div className="mb-4 md:mr-2 md:mb-0">
                 <label
                   className="block mb-2 text-sm font-bold text-gray-700"
@@ -241,6 +224,7 @@ function App() {
             </form>
           </div>
         </div>
+        <ModalExito open={isSuccessModalOpen} setOpen={setSuccessModalOpen} data={formData} />
       </div>
     </>
   )
