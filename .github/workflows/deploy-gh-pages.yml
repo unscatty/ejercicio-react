@@ -8,28 +8,36 @@ jobs:
   Build-And-Deploy-To-GH-Pages:
     runs-on: ubuntu-latest
     steps:
+      - name: Check GitHub Status
+        uses: crazy-max/ghaction-github-status@v3
+        with:
+          pages_threshold: major_outage
+
       - name: Checkout
-        uses: actions/checkout@v2.6.0
+        uses: actions/checkout@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v3.5.1
+        uses: actions/setup-node@v3
         with:
           node-version: 16.x
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         id: pnpm-install
-      
+        with:
+          version: 7
+          run_install: true
+
       - name: Install deps
         run: pnpm install
 
       - name: Create env file
         run: |
           echo "${{ secrets.DEPLOY_GH_PAGES_ENV }}" > .env.gh-pages.local
-      
+
       - name: Build static site
         run: pnpm run build --mode gh-pages
-      
+
       - name: Create 404 page
         run: cp dist/index.html dist/404.html
 
@@ -38,7 +46,8 @@ jobs:
           echo "${{ secrets.JEKYLL_CONFIG }}" > dist/_config.yml
 
       - name: Deploy to Github pages
-        uses: crazy-max/ghaction-github-pages@v3.1.0
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v3
         with:
           target_branch: gh-pages
           build_dir: dist
