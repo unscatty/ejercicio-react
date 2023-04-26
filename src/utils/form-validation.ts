@@ -23,7 +23,7 @@ export const validationSchema = z
       }),
     genero: z.nativeEnum(Genero),
     terms: z.literal(true, {
-      errorMap: () => ({ message: "Por favor acepta los términos y condiciones" }),
+      errorMap: () => ({ message: "Por favor, acepta los términos y condiciones" }),
     }),
   })
 

@@ -218,7 +218,7 @@ function App() {
                   className="inline-block text-sm text-blue-500 align-baseline hover:text-blue-800"
                   href="#"
                 >
-                  ¿Olvidate tu contraseña?
+                  ¿Olvidaste tu contraseña?
                 </a>
               </div>
             </form>
